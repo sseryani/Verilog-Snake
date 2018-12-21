@@ -1,0 +1,35 @@
+module combined_gui (input clk, input reset, input start, input isDead, 
+							output [7:0] x, 
+							output [6:0] y, 
+							output [2:0] colour,
+							output plot);
+							
+							
+		control spl(
+		.clk(clk),
+		.reset(reset),
+		.start(start),
+		.showTitle(showTitle),
+		.drawBlack(drawBlack),
+		.showGameOver(showGameOver),
+		.flash(flash),
+		.plot(plot)
+		);
+		
+		
+		
+		datapath db(
+		.clk(clk),
+		.rst(reset),
+		.showTitle(showTitle),
+		.showBlack(drawBlack),
+		.showGameOver(showGameOver),
+		.flash(flash),
+		.x(x),
+		.y(y),
+		.colourOut(colour)
+		);
+
+		
+		
+endmodule

@@ -1,0 +1,10 @@
+module fpga_top(KEY);
+		
+	input [3:0] KEY;
+	
+	wire dirIn = {KEY[3], KEY[2], KEY[1], KEY[0]};
+	
+	
+	
+	
+endmodule

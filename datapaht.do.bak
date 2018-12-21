@@ -1,0 +1,16 @@
+vlib work
+
+vlog -timescale 1ns/1ns datapath.v
+
+vsim datapath -L altera_mf_ver snakeram
+
+log {/*}
+add wave {/*}
+
+
+force {clk} 0 0, 1 5 -r 10
+force {reset} 0 0, 1 11
+force {direction} 2#1000
+force {title_done} 0 0, 1 10000
+
+run 200ns

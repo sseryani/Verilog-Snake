@@ -1,0 +1,52 @@
+module datapath(snakeHeadX, snakeHeadY,
+					 idle_state, left_state, right_state, up_state, down_state, 
+					 clk, reset);
+					
+						
+		 input clk, reset; // Standard signals
+		 input idle_state, left_state, right_state, up_state, down_state; // States
+		 
+		 // Output X
+		 output reg [8:0] snakeHeadX;
+		 output reg [7:0] snakeHeadY;
+		 
+		 // Describe the circuit logic for the Snake's head 
+		 
+		always @(posedge clk) 
+		
+		begin
+		
+			if (reset == 1'b0 || idle_state)  // If Reset is low,
+			begin // // Place Snake Head back at center
+					snakeHeadX <= 8'b1010_0000; // i.e. x = 160
+					snakeHeadY <= 7'b1111_000; // And y = 120
+			end
+				
+			if (left_state) // If we are going left,
+			begin
+				snakeHeadX <= snakeHeadX - 3'b100; // Only x coordinate changes
+				snakeHeadY <= snakeHeadY;
+			end
+			
+			if (right_state) // If we are going right, 
+			begin
+				snakeHeadX <= snakeHeadX + 3'b100; // = 4 in decimal
+				snakeHeadY <= snakeHeadY;
+			end
+					
+			if (up_state)
+			begin
+				snakeHeadX <= snakeHeadX;
+				snakeHeadY <= snakeHeadY - 3'b100; // Change y now
+			end	
+			
+			if (down_state)
+			begin
+				snakeHeadX <= snakeHeadX;
+				snakeHeadY <= snakeHeadY + 3'b100; 
+			end
+		
+		end
+
+	
+endmodule

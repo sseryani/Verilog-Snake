@@ -1,0 +1,106 @@
+module control(idle_state, left_state, right_state, up_state, down_state,
+					clk, reset, start, game_over,
+				   left, up, down, right);
+		
+	input clk; // A special clock to update the snake's movement
+	input left, up, down, right; // Input whether to go left, up, down or right respectively
+	input game_over; // Indicates whether the game has ended
+	input reset; // Indicates whether to restart the game
+	input start; // Indicates whether we start the game
+	
+	// The different states that get activated
+	output reg idle_state, left_state, right_state, up_state, down_state; 
+	
+	// State controllers
+	reg [2:0] current_state, next_state;
+	
+	// Rename the States
+	localparam
+				IDLE_SNAKE = 3'd0,
+				LEFT_DIRECTION = 3'd1,`ee
+				UP_DIRECTION = 3'd2,
+				RIGHT_DIRECTION = 3'd3,
+				DOWN_DIRECTION = 3'd4;
+				
+	// Describe the state table
+	
+	always @(*) 
+	begin 
+		case (current_state) // Toggle through the states
+				// Start the game when start is activated
+				IDLE_SNAKE : next_state = start ? LEFT_DIRECTION : IDLE_SNAKE;
+				
+				LEFT_DIRECTION : // If going left...
+				begin
+					if (up) // Up was pressed
+						next_state = UP_DIRECTION;
+					else if (down) // Down was pressed 
+						next_state = DOWN_DIRECTION;
+					else // Anything else
+						next_state = LEFT_DIRECTION; // Keep going left
+				end
+				
+				UP_DIRECTION : // If going up...
+				begin
+					if (left) // Left was pressed
+						next_state = LEFT_DIRECTION;
+					else if (right) // Right was pressed
+						next_state = RIGHT_DIRECTION;
+					else // Keep going up
+						next_state = UP_DIRECTION;
+				end
+			
+				RIGHT_DIRECTION : // If going down...
+				begin
+					if (up) // Up was pressed
+						next_state = UP_DIRECTION;
+					else if (down) // Down was pressed
+						next_state = DOWN_DIRECTION;
+					else // Keep going right
+						next_state = RIGHT_DIRECTION;
+				end
+				
+				DOWN_DIRECTION : // If going down...
+				begin
+					if (left) // Left was pressed
+						next_state = LEFT_DIRECTION;
+					else if (right) // Right was pressed
+						next_state = RIGHT_DIRECTION;
+					else // Keep going down
+						next_state = DOWN_DIRECTION;
+				end
+				
+				default : next_state = IDLE_SNAKE;
+		endcase
+	end
+	
+	// Describe the output logic
+	
+	always @(*)
+	begin
+        idle_state = 1'b0; // By default make everything 0
+        left_state = 1'b0;
+        up_state = 1'b0;
+		  right_state = 1'b0;
+		  down_state = 1'b0;
+		  
+		  case(current_state)
+				IDLE_SNAKE: idle_state = 1'b1;
+				LEFT_DIRECTION: left_state = 1'b1;
+				UP_DIRECTION: up_state = 1'b1;
+				RIGHT_DIRECTION: right_state = 1'b1;
+				DOWN_DIRECTION: down_state = 1'b1;
+		  endcase	
+	end
+
+// Describe the State Register
+
+always @(posedge clk) 
+begin
+		if (!reset || game_over) // Reset the circuit, or game over
+			current_state <= IDLE_SNAKE; // Go back to idle state
+		else // Go to next state
+			current_state <= next_state;
+end
+
+endmodule

@@ -1,0 +1,101 @@
+module SnakeInterface(clk, reset, plot, x, y, colour, dirIn, start_game);
+
+	input			clk;				//	50 MHz
+	input			reset;
+	input [3:0] dirIn; 			// The direction
+	input			start_game;    // Start the game
+	
+	output reg [7:0] x;
+	output reg [6:0] y;
+	output reg [2:0] colour;
+	
+	output plot;
+
+// ============================================ Keyboard Logic ===================================================
+	
+	wire[2:0] direction;
+	
+	direction_control dc (
+						.dirOut(direction),
+						.clk(clk),
+						.reset(reset),
+						.dirIn(dirIn)
+						);
+
+	
+// ============================================ End Keyboard Logic ===============================================
+
+// ============================================ Update clock  ====================================================
+	
+	wire update_clk; 
+	wire [27:0] rd_out;
+	
+	RateDivider rd(
+					.clk(clk),
+					.reset(reset),
+					.enable(1'b1),
+					.load(28'b0001_0111_1101_0111_1000_0011_1111), // 2 pulses per second
+					.Q(rd_out)
+					);
+					
+	assign update_clk = (rd_out == 28'b0000000000000000000000000000) ? 1'b1 : 1'b0;
+	
+// ============================================ End Clock Division ======================================
+
+					
+// ============================================ Control/Datapath ====================================================
+
+	wire idle_state, load_part_into_ram, inc_address,
+	load_ram_into_current, draw_current, 
+	update_head, inc_check, load_head_into_prev;
+	wire load_ram;
+	wire load_prev_into_ram, load_current_into_prev, erase_trail; 
+	wire draw_apple;
+	wire has_collided;
+	wire isDead;
+		
+	wire reset_ram;
+	wire reset_address;
+	wire [3:0] drawStatus;
+	
+	wire [7:0] x_out;
+	wire [6:0] y_out;
+	wire [2:0] colour_out;
+	
+
+	
+	control c0 (idle_state, load_part_into_ram, inc_address, 
+					load_ram_into_current, draw_current,
+					drawStatus, inc_check, load_head_into_prev,
+					update_head, load_prev_into_ram, load_current_into_prev,
+					reset_ram, erase_trail, draw_apple,
+					reset_address, clk, reset, update_clk, 
+					start_game, has_collided, isDead);
+				
+	datapath d0 (x_out, y_out, colour_out,
+					plot, drawStatus, idle_state,
+					load_ram, inc_address, load_ram_into_current,
+					draw_current, update_head, load_head_into_prev,
+					load_prev_into_ram, reset_ram, load_current_into_prev, 
+					erase_trail, draw_apple, reset_address, 
+					clk, reset, direction, 
+					isDead, inc_check, has_collided);
+	
+	
+	
+	always @(*)
+	x = 0;
+	y = 0;
+	colour = 0;
+	
+	
+	begin 
+	if (plot)
+	begin
+		x = x_out;
+		y = y_out;
+		colour = colour_out;
+	end
+	end
+	
+endmodule

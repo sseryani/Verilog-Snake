@@ -1,0 +1,16 @@
+module direction_control(dirIn, reset, clk);
+
+	output reg [2:0] dirOut; // Signal to datapath
+	
+	input [3:0] dirIn; // The inputted direction
+	input reset;
+	input clk;
+	
+	
+	wire left = dirIn[3];
+	wire up = dirIn[2];
+	wire down = dirIn[1];
+	wire right = dirIn[0];
+
+			
+endmodule
